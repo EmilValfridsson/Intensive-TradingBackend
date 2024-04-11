@@ -1,9 +1,15 @@
 import axios from "axios";
 import express from "express";
 
-const app = express();
+const router = express();
 
-app.get("/", async (req, res) => {
+export interface TGLdata {
+  last_updated: string;
+  top_gainers: [];
+  top_losers: [];
+}
+
+router.get("/", async (req, res) => {
   try {
     const stockSymbol = req.query.data;
     console.log(stockSymbol, "stockSymbol");
@@ -19,7 +25,23 @@ app.get("/", async (req, res) => {
   }
 });
 
-export default app;
+const TGL_URL =
+  "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=";
+
+router.get("/gainers", async (req, res) => {
+  const response = await axios.get(TGL_URL + process.env.DEMO_KEY);
+
+  const newData = filterData(response.data);
+
+  res.send(newData);
+});
+
+function filterData(data: TGLdata) {
+  const { top_gainers, top_losers: losers, last_updated } = data;
+  return top_gainers;
+}
+
+export default router;
 
 //
 //
