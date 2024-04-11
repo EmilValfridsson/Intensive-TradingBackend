@@ -2,7 +2,6 @@ import express from "express";
 import auth from "./routes/auth";
 import users from "./routes/users";
 import cors from "cors";
-
 import stocks from "./routes/stocks";
 const app = express();
 

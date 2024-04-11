@@ -3,12 +3,6 @@ import express from "express";
 
 const router = express();
 
-export interface TGLdata {
-  last_updated: string;
-  top_gainers: [];
-  top_losers: [];
-}
-
 router.get("/", async (req, res) => {
   try {
     const stockSymbol = req.query.data;
@@ -31,15 +25,10 @@ const TGL_URL =
 router.get("/gainers", async (req, res) => {
   const response = await axios.get(TGL_URL + process.env.DEMO_KEY);
 
-  const newData = filterData(response.data);
+  const { top_gainers } = response.data;
 
-  res.send(newData);
+  res.send(top_gainers);
 });
-
-function filterData(data: TGLdata) {
-  const { top_gainers, top_losers: losers, last_updated } = data;
-  return top_gainers;
-}
 
 export default router;
 
