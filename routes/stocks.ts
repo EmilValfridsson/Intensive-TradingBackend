@@ -1,9 +1,9 @@
 import axios from "axios";
 import express from "express";
 
-const app = express();
+const router = express();
 
-app.get("/", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const stockSymbol = req.query.data;
     console.log(stockSymbol, "stockSymbol");
@@ -19,7 +19,18 @@ app.get("/", async (req, res) => {
   }
 });
 
-export default app;
+const TGL_URL =
+  "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=";
+
+router.get("/gainers", async (req, res) => {
+  const response = await axios.get(TGL_URL + process.env.DEMO_KEY);
+
+  const { top_gainers } = response.data;
+
+  res.send(top_gainers);
+});
+
+export default router;
 
 //
 //
