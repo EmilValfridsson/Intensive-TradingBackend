@@ -2,6 +2,7 @@ import express from "express";
 import auth from "./routes/auth";
 import users from "./routes/users";
 import cors from "cors";
+import tgl from "./routes/tgl";
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use("/api/auth", auth);
 app.use("/api/users", users);
+app.use("/api/tgl", tgl);
 
 const PORT = 9111;
 
