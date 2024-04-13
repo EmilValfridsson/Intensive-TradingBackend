@@ -21,13 +21,6 @@ model User {
   isAdmin  Boolean @default(false)
 }
 
-model Stock {
-  name      String
-  symbol    String  @unique
-  date      String
-  high      Int
-  low       Int
-  close     Int
-  volume    Int
-  isFavored Boolean @default(false)
+model FavoriteStock {
+  ticker String @unique
 }
