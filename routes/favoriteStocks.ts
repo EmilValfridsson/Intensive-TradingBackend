@@ -6,6 +6,13 @@ import auth from "../middleware/auth";
 const router = express.Router();
 const prisma = new PrismaClient();
 
+router.get("/", auth, async (req, res) => {
+  const favoriteStocks = await prisma.favoriteStock.findMany({
+    where: { userId: req.userId },
+  });
+  return res.send(favoriteStocks);
+});
+
 router.post("/", auth, async (req, res) => {
   const validation = validate(req.body);
 
