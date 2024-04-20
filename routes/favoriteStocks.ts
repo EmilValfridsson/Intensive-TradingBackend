@@ -1,14 +1,16 @@
 import express from "express";
 import { validate } from "../schemas/Stock";
 import { PrismaClient } from "@prisma/client";
-import auth from "../middleware/auth";
+import auth, { AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 router.get("/", auth, async (req, res) => {
+  const user = (req as AuthRequest).user;
+
   const favoriteStocks = await prisma.favoriteStock.findMany({
-    where: { userId: req.userId },
+    where: { userId: user.id },
   });
   return res.send(favoriteStocks);
 });
@@ -19,8 +21,10 @@ router.post("/", auth, async (req, res) => {
   if (!validation.success)
     return res.status(400).send(validation.error.issues[0].message);
 
+  const user = (req as AuthRequest).user;
+
   const activeUser = await prisma.user.findFirst({
-    where: { id: req.userId },
+    where: { id: user.id },
   });
 
   if (!activeUser) return res.status(404).send("user not found");
