@@ -30,81 +30,48 @@ router.get("/gainers", async (req, res) => {
   res.send(top_gainers);
 });
 
+interface StockInfo {
+  Symbol: string;
+  Name: string;
+  Description: string;
+  Exchange: string;
+  Currency: string;
+  Sector: string;
+  Industry: string;
+  MarketCapitalization: string;
+  EBITDA: string;
+  PERatio: string;
+  DividendPerShare: string;
+  DividendYield: string;
+  EPS: string;
+  RevenueTTM: string;
+  GrossProfitTTM: string;
+  QuarterlyEarningsGrowthYOY: string;
+  QuarterlyRevenueGrowthYOY: string;
+  AnalystTargetPrice: string;
+  TrailingPE: string;
+  ForwardPE: string;
+  PriceToSalesRatioTTM: string;
+  PriceToBookRatio: string;
+  Beta: string;
+  "52WeekHigh": string;
+  "52WeekLow": string;
+  "50DayMovingAverage": string;
+  "200DayMovingAverage": string;
+}
+
+router.get("/stats/:id", async (req, res) => {
+  const stockSymbol = req.params.id;
+  console.log(stockSymbol, "STOCKSYMBOL FOR STATS");
+
+  const response = await axios.get(
+    `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stockSymbol}&apikey=${process.env.EMIL_API_KEY}`
+  );
+
+  const stockData: StockInfo = response.data;
+
+  console.log(stockData, "stockData");
+  res.send(stockData);
+});
+
 export default router;
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// app.get('/api/data', (req, res) => {
-//   const stockSymbol = req.query.data;
-//   console.log(stockSymbol);
-// });
-
-// class Stock extends React.Component {
-//   constructor(props: any) {
-//     super(props);
-//     this.state = {
-//       xValues: [],
-//       yValues: [],
-//     };
-//   }
-
-//   componentDidMount(): void {
-//     this.fetchStock();
-//   }
-
-//   fetchStock() {
-//     const pointerToThis = this;
-//     console.log(pointerToThis, "pointer to this");
-
-//     let xValuesFunction = [];
-//     let yValuesFunction = [];
-//     fetch("http://localhost:9111/api/stocks")
-//       .then((res) => {
-//         if (!res.ok) {
-//           throw new Error(res.statusText);
-//         }
-//         return res.json();
-//       })
-//       .then(function (data) {
-//         console.log(data, "Data");
-
-//         for (var key in data[`Time Series (Daily)`]) {
-//           xValuesFunction.push(key);
-//           yValuesFunction.push(data[`Time Series (Daily)`][key][`1. open`]);
-//         }
-//         pointerToThis.setState({
-//           xValues: xValuesFunction,
-//           yValues: yValuesFunction,
-//         });
-//       });
-//   }
-//   render() {
-//     return (
-//       <div>
-//         <h1>Stock</h1>
-//         <Plot
-//           data={[
-//             {
-//               x: this.state.xValues,
-//               y: this.state.yValues,
-//               type: "scatter",
-//               mode: "lines+markers",
-//               marker: { color: "red" },
-//             },
-//           ]}
-//           layout={{ width: 640, height: 480, title: `AAPL` }}
-//         />
-//       </div>
-//     );
-//   }
-// }
