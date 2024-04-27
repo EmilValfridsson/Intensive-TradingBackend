@@ -74,4 +74,29 @@ router.get("/stats/:id", async (req, res) => {
   res.send(stockData);
 });
 
+interface StockNews {
+  feed: {
+    title: string;
+    url: string;
+  }[];
+}
+
+router.get("/news/:id", async (req, res) => {
+  const stockSymbol = req.params.id;
+  const STOCK_API_KEY = process.env.STOCK_API_KEY;
+  const newsUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${stockSymbol}&apikey=${STOCK_API_KEY}`;
+
+  const response = await axios.get(newsUrl);
+  const responseData = response.data;
+
+  const filteredNews: StockNews = {
+    feed: responseData.feed.map((item: any) => ({
+      title: item.title,
+      url: item.url,
+    })),
+  };
+
+  res.send(filteredNews);
+});
+
 export default router;
