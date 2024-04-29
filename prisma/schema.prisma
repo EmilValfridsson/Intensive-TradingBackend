@@ -14,16 +14,27 @@ datasource db {
 }
 
 model User {
-  id       String          @id @default(cuid())
-  name     String
-  username String          @unique
-  password String
-  isAdmin  Boolean         @default(false)
-  tickers  FavoriteStock[]
+  id        String          @id @default(cuid())
+  name      String
+  username  String          @unique
+  password  String
+  isAdmin   Boolean         @default(false)
+  favorites FavoriteStock[]
+  UserStock UserStock[]
 }
 
 model FavoriteStock {
-  ticker String  @unique
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  id        String      @id @default(cuid())
+  ticker    String      @unique
+  User      User?       @relation(fields: [userId], references: [id])
+  userId    String?
+  UserStock UserStock[]
+}
+
+model UserStock {
+  id             String        @id @default(cuid())
+  user           User          @relation(fields: [userId], references: [id])
+  userId         String
+  favoriteStock  FavoriteStock @relation(fields: [favoriteTicker], references: [ticker])
+  favoriteTicker String
 }

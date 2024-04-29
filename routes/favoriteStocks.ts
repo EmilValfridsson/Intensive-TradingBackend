@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 router.get("/", auth, async (req, res) => {
   const user = (req as AuthRequest).user;
 
-  const favoriteStocks = await prisma.favoriteStock.findMany({
+  const favoriteStocks = await prisma.userStock.findMany({
     where: { userId: user.id },
   });
   return res.send(favoriteStocks);
@@ -29,14 +29,74 @@ router.post("/", auth, async (req, res) => {
 
   if (!activeUser) return res.status(404).send("user not found");
 
-  const ticker = await prisma.favoriteStock.create({
-    data: {
-      ticker: req.body.ticker,
-      userId: activeUser.id,
-    },
-  });
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const existingFavorite = await prisma.favoriteStock.findFirst({
+        where: { ticker: req.body.ticker },
+      });
 
-  return res.status(201).send(ticker);
+      if (existingFavorite) {
+        await prisma.userStock.create({
+          data: {
+            user: { connect: { id: user.id } },
+            favoriteStock: { connect: { ticker: existingFavorite.ticker } },
+          },
+        });
+
+        return res.status(200).send(existingFavorite);
+      } else {
+        const newFavoriteStock = await prisma.favoriteStock.create({
+          data: {
+            ticker: req.body.ticker,
+            UserStock: {
+              create: {
+                user: { connect: { id: user.id } },
+              },
+            },
+          },
+        });
+
+        return res.status(201).send(newFavoriteStock);
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to add favorite stock" });
+  }
+});
+
+router.delete("/:ticker", auth, async (req, res) => {
+  const user = (req as AuthRequest).user;
+
+  try {
+    const favoriteStock = await prisma.favoriteStock.findFirst({
+      where: { ticker: req.params.ticker },
+    });
+
+    if (!favoriteStock) {
+      return res.status(404).send("Favorite stock not found");
+    }
+
+    const userStock = await prisma.userStock.findFirst({
+      where: {
+        userId: user.id,
+        favoriteTicker: favoriteStock.ticker,
+      },
+    });
+
+    if (!userStock) {
+      return res.status(404).send("Favorite stock not found for user");
+    }
+
+    const deleteFavorite = await prisma.userStock.delete({
+      where: {
+        id: userStock.id,
+      },
+    });
+
+    return res.status(200).send(deleteFavorite);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to remove favorite stock" });
+  }
 });
 
 export default router;
