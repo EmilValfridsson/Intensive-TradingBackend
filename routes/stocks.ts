@@ -87,14 +87,8 @@ router.get("/news/:id", async (req, res) => {
   const newsUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${stockSymbol}&apikey=${STOCK_API_KEY}`;
 
   const response = await axios.get(newsUrl);
-  const responseData = response.data;
 
-  const filteredNews: StockNews = {
-    feed: responseData.feed.map((item: any) => ({
-      title: item.title,
-      url: item.url,
-    })),
-  };
+  const filteredNews: StockNews = response.data;
 
   res.send(filteredNews);
 });
