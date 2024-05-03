@@ -35,16 +35,7 @@ router.post("/", auth, async (req, res) => {
         where: { ticker: req.body.ticker },
       });
 
-      if (existingFavorite) {
-        await prisma.userStock.create({
-          data: {
-            user: { connect: { id: user.id } },
-            favoriteStock: { connect: { ticker: existingFavorite.ticker } },
-          },
-        });
-
-        return res.status(200).send(existingFavorite);
-      } else {
+      if (!existingFavorite) {
         const newFavoriteStock = await prisma.favoriteStock.create({
           data: {
             ticker: req.body.ticker,
@@ -58,6 +49,22 @@ router.post("/", auth, async (req, res) => {
 
         return res.status(201).send(newFavoriteStock);
       }
+
+      const existingUserStock = await prisma.userStock.findFirst({
+        where: { userId: user.id, favoriteTicker: existingFavorite.ticker },
+      });
+
+      if (existingUserStock)
+        return res.status(400).send("this stock is already favored");
+
+      const newUserStock = await prisma.userStock.create({
+        data: {
+          user: { connect: { id: user.id } },
+          favoriteStock: { connect: { ticker: existingFavorite.ticker } },
+        },
+      });
+
+      return res.status(200).send(newUserStock);
     });
   } catch (error) {
     return res.status(500).json({ error: "Failed to add favorite stock" });
